@@ -10,12 +10,16 @@ import (
 	"strconv"
 )
 
-// DefaultEtag middleware which uses MD5
+// DefaultEtag middleware which uses MD5 as its hashing function
 func DefaultEtag(next http.Handler) http.Handler {
 	return Etag(md5.New(), next)
 }
 
-// Etag middleware
+// Etag middleware which handles adding an ETag header to the response
+// An ETag is a hash of a resource that client's/browser use to cache resourse that are unchanged.
+// It allows the server to skip sending the resource over the object if the client has it already
+// A StatusNotModified (304) is returned when the client's resource is up to date.
+// Client's set the If-None-Match header to send their cached ETag for a resource
 func Etag(hash hash.Hash, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
