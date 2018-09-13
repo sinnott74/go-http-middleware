@@ -11,31 +11,18 @@ import (
 	"testing"
 )
 
-var responseText = "Test"
-
-type etagTestHandler struct {
-}
-
-func (etagTestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(responseText))
-}
-
-type etagTestHandlerNotOK struct {
-}
-
-func (etagTestHandlerNotOK) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusInternalServerError)
-}
-
-func TestDefaultETag(t *testing.T) {
+// TestDefaultETagOk tests that the expect MD5 ETag is returned
+func TestDefaultETagOk(t *testing.T) {
 
 	// Arrange
 	r, _ := http.NewRequest("GET", "/test", nil)
 	w := httptest.NewRecorder()
-	etag := DefaultEtag(&etagTestHandler{})
-
+	responseText := "Test"
 	expectedHash := calculateHash(md5.New(), responseText)
+	etag := DefaultEtag(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(responseText))
+	}))
 
 	// Act
 	etag.ServeHTTP(w, r)
@@ -49,13 +36,17 @@ func TestDefaultETag(t *testing.T) {
 	}
 }
 
+// TestDefaultETagMatch tests StatusNotModified is returned when the If-None-Match header matches the ETag
 func TestDefaultETagMatch(t *testing.T) {
 
 	// Arrange
 	r, _ := http.NewRequest("GET", "/test", nil)
 	r.Header.Add("If-None-Match", "W/\"4-DLxmEfVUC9CAmjiNyVphWw==\"")
 	w := httptest.NewRecorder()
-	etag := DefaultEtag(&etagTestHandler{})
+	etag := DefaultEtag(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Test"))
+	}))
 
 	// Act
 	etag.ServeHTTP(w, r)
@@ -66,12 +57,16 @@ func TestDefaultETagMatch(t *testing.T) {
 	}
 }
 
+// TestDefaultETagErrorResponse tests that no ETag is returned when the wrapped handler response isn't ok
 func TestDefaultETagErrorResponse(t *testing.T) {
 
 	// Arrange
 	r, _ := http.NewRequest("GET", "/test", nil)
 	w := httptest.NewRecorder()
-	etag := DefaultEtag(&etagTestHandlerNotOK{})
+	etag := DefaultEtag(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Test"))
+	}))
 
 	// Act
 	etag.ServeHTTP(w, r)
@@ -86,12 +81,16 @@ func TestDefaultETagErrorResponse(t *testing.T) {
 	}
 }
 
+// TestRequestTwice tests that using the ETag returned by one request will result in a StatusNotModified when requesting again
 func TestRequestTwice(t *testing.T) {
 
 	// Arrange
 	r, _ := http.NewRequest("GET", "/test", nil)
 	w := httptest.NewRecorder()
-	etag := DefaultEtag(&etagTestHandler{})
+	etag := DefaultEtag(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Test"))
+	}))
 
 	// Act
 	etag.ServeHTTP(w, r)
@@ -114,10 +113,15 @@ func TestRequestTwice(t *testing.T) {
 	}
 }
 
+// TestEtag tests that a different Hash struct can be supplied and is used
 func TestEtag(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/test", nil)
 	w := httptest.NewRecorder()
-	etag := Etag(sha1.New(), &etagTestHandler{})
+	responseText := "Test"
+	etag := Etag(sha1.New(), http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(responseText))
+	}))
 	expectedHash := calculateHash(sha1.New(), responseText)
 
 	// Act
@@ -132,6 +136,7 @@ func TestEtag(t *testing.T) {
 	}
 }
 
+// calculateHash calculates the expected Etag
 func calculateHash(hash hash.Hash, text string) string {
 	hash.Write([]byte(text))
 	base64Hash := base64.StdEncoding.EncodeToString(hash.Sum(nil))

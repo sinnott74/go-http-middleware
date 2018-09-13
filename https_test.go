@@ -6,13 +6,8 @@ import (
 	"testing"
 )
 
-type httpsTestHandler struct {
-}
-
-func (httpsTestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-}
-
+// TestHTTPSRedirect tests that when the x-forwarded-proto header is set to http
+// the request is redirected to the HTTPS version of the url
 func TestHTTPSRedirect(t *testing.T) {
 
 	// Arrange
@@ -20,7 +15,9 @@ func TestHTTPSRedirect(t *testing.T) {
 	r.Host = "example.com"
 	r.Header.Add("x-forwarded-proto", "http")
 	w := httptest.NewRecorder()
-	https := HTTPS(&httpsTestHandler{})
+	https := HTTPS(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
 
 	// Act
 	https.ServeHTTP(w, r)
@@ -34,6 +31,8 @@ func TestHTTPSRedirect(t *testing.T) {
 	}
 }
 
+// TestHTTPSRedirect tests that when the x-forwarded-proto header is set to https
+// the request continues to the next chained http handler
 func TestHTTPSOk(t *testing.T) {
 
 	// Arrange
@@ -41,7 +40,9 @@ func TestHTTPSOk(t *testing.T) {
 	r.Host = "example.com"
 	r.Header.Add("x-forwarded-proto", "https")
 	w := httptest.NewRecorder()
-	https := HTTPS(&httpsTestHandler{})
+	https := HTTPS(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
 
 	// Act
 	https.ServeHTTP(w, r)
