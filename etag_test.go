@@ -86,10 +86,38 @@ func TestDefaultETagErrorResponse(t *testing.T) {
 	}
 }
 
+func TestRequestTwice(t *testing.T) {
+
+	// Arrange
+	r, _ := http.NewRequest("GET", "/test", nil)
+	w := httptest.NewRecorder()
+	etag := DefaultEtag(&etagTestHandler{})
+
+	// Act
+	etag.ServeHTTP(w, r)
+
+	// Assert
+	if w.Code != http.StatusOK {
+		t.Fatalf("StatusOK 200 expected - %d", w.Code)
+	}
+
+	etagHeader := w.Header().Get("ETag")
+	r, _ = http.NewRequest("GET", "/test", nil)
+	r.Header.Add("If-None-Match", etagHeader)
+	w = httptest.NewRecorder()
+
+	etag.ServeHTTP(w, r)
+
+	// Assert
+	if w.Code != http.StatusNotModified {
+		t.Fatalf("StatusNotModified 304 expected - %d", w.Code)
+	}
+}
+
 func TestEtag(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/test", nil)
 	w := httptest.NewRecorder()
-	etag := Etag(sha1.New(), &etagTestHandler{})
+	etag := Etag(sha1.New, &etagTestHandler{})
 	expectedHash := calculateHash(sha1.New(), responseText)
 
 	// Act
