@@ -1,5 +1,7 @@
 # go-http-middleware
 
+[![Build Status](https://travis-ci.org/sinnott74/go-http-middleware.svg?branch=master)](https://travis-ci.org/sinnott74/go-http-middleware)
+
 Collection of Golang HTTP middlewares fo use with Go's `net/http` package
 
 - [**etag**](https://github.com/sinnott74/go-http-middleware/blob/master/etag.go) Adds [ETag](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) support for each resource.
