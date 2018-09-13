@@ -119,7 +119,7 @@ func TestEtag(t *testing.T) {
 	w := httptest.NewRecorder()
 	responseText := "Test"
 	etag := Etag(sha1.New(), http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(responseText))
 	}))
 	expectedHash := calculateHash(sha1.New(), responseText)
