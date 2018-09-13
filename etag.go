@@ -12,14 +12,15 @@ import (
 
 // DefaultEtag middleware which uses MD5
 func DefaultEtag(next http.Handler) http.Handler {
-	return Etag(md5.New, next)
+	return Etag(md5.New(), next)
 }
 
 // Etag middleware
-func Etag(newHash func() hash.Hash, next http.Handler) http.Handler {
+func Etag(hash hash.Hash, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		etagWriter := &etagWriter{rw: w, hash: newHash(), buf: bytes.NewBuffer(nil)}
+		hash.Reset()
+		etagWriter := &etagWriter{rw: w, hash: hash, buf: bytes.NewBuffer(nil)}
 		next.ServeHTTP(etagWriter, r)
 
 		if !isStatusOk(etagWriter.status) || etagWriter.status == http.StatusNoContent || etagWriter.buf.Len() == 0 {

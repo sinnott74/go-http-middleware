@@ -117,7 +117,7 @@ func TestRequestTwice(t *testing.T) {
 func TestEtag(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/test", nil)
 	w := httptest.NewRecorder()
-	etag := Etag(sha1.New, &etagTestHandler{})
+	etag := Etag(sha1.New(), &etagTestHandler{})
 	expectedHash := calculateHash(sha1.New(), responseText)
 
 	// Act
