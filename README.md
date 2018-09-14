@@ -8,6 +8,8 @@ Collection of Golang HTTP middlewares fo use with Go's `net/http` package
 
 - [**https**](https://github.com/sinnott74/go-http-middleware/blob/master/https.go) Forces [X-Forwarded-Proto](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-Proto) header to be set to HTTPS. Useful when behind a load balancer i.e. aws, cloudfoundry, etc.
 
+- [**auth**](https://github.com/sinnott74/go-http-middleware/blob/master/auth.go) handles authenication using a user supplied authenication function.
+
 ## Installation
 
 `go get https://github.com/sinnott74/go-http-middleware`
