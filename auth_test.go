@@ -86,11 +86,11 @@ func TestAuthOkAddToContext(t *testing.T) {
 	r.Header.Add("Authorization", "magic_password")
 	w := httptest.NewRecorder()
 	authFunc := func(ctx context.Context, authHeader string) (bool, context.Context) {
-		userCtx := context.WithValue(ctx, "user", "test@test.com")
+		userCtx := context.WithValue(ctx, userContextKey, "test@test.com")
 		return true, userCtx
 	}
 	auth := Auth(authFunc, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Context().Value("user") != "test@test.com" {
+		if r.Context().Value(userContextKey) != "test@test.com" {
 			t.Fatal("Expected user to be set on the request context")
 		}
 	}))
@@ -103,3 +103,9 @@ func TestAuthOkAddToContext(t *testing.T) {
 		t.Fatal("StatusOK 200 expected")
 	}
 }
+
+type contextKey struct {
+	name string
+}
+
+var userContextKey = &contextKey{"user"}
