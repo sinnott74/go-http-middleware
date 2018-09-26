@@ -17,8 +17,7 @@ func TestAuthNoHeader(t *testing.T) {
 		return true, ctx
 	}
 	auth := Auth(authFunc, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Test"))
+		t.Fatal("Next handler should not have been called")
 	}))
 
 	// Act
@@ -41,8 +40,7 @@ func TestAuthFuncNotOk(t *testing.T) {
 		return false, ctx
 	}
 	auth := Auth(authFunc, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Test"))
+		t.Fatal("Next handler should not have been called")
 	}))
 
 	// Act

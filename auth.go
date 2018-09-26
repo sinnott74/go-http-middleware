@@ -20,11 +20,13 @@ func Auth(authFunc AuthFunc, next http.Handler) http.Handler {
 			// missing header
 			w.WriteHeader(http.StatusUnauthorized)
 			// w.Write(errors.New("unauthorized: no authentication provided").Error())
+			return
 		}
 		ok, ctx := authFunc(r.Context(), auth)
 		if !ok {
 			// unauthorised
 			w.WriteHeader(http.StatusUnauthorized)
+			return
 		}
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
