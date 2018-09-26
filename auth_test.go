@@ -26,7 +26,7 @@ func TestAuthNoHeader(t *testing.T) {
 
 	// Assert
 	if w.Code != http.StatusUnauthorized {
-		t.Fatal("StatusUnauthorized 401 expected")
+		t.Fatalf("StatusUnauthorized 401 expected but was %v", w.Code)
 	}
 }
 
@@ -49,7 +49,7 @@ func TestAuthFuncNotOk(t *testing.T) {
 
 	// Assert
 	if w.Code != http.StatusUnauthorized {
-		t.Fatal("StatusUnauthorized 401 expected")
+		t.Fatalf("StatusUnauthorized 401 expected but was %v", w.Code)
 	}
 }
 
@@ -73,7 +73,7 @@ func TestAuthOk(t *testing.T) {
 
 	// Assert
 	if w.Code != http.StatusOK {
-		t.Fatal("StatusOK 200 expected")
+		t.Fatalf("StatusOK 200 expected but was %v", w.Code)
 	}
 }
 
@@ -99,7 +99,7 @@ func TestAuthOkAddToContext(t *testing.T) {
 
 	// Assert
 	if w.Code != http.StatusOK {
-		t.Fatal("StatusOK 200 expected")
+		t.Fatalf("StatusOK 200 expected but was %v", w.Code)
 	}
 }
 

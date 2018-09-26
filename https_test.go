@@ -49,6 +49,6 @@ func TestHTTPSOk(t *testing.T) {
 
 	// Assert
 	if w.Code != http.StatusOK {
-		t.Fatal("StatusOK 200 expected")
+		t.Fatalf("StatusOK 200 expected but was %v", w.Code)
 	}
 }
