@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,8 +14,8 @@ func TestAuthNoHeader(t *testing.T) {
 	// Arrange
 	r, _ := http.NewRequest("GET", "/", nil)
 	w := httptest.NewRecorder()
-	authFunc := func(ctx context.Context, authHeader string) (bool, context.Context) {
-		return true, ctx
+	authFunc := func(ctx context.Context, authHeader string) (context.Context, error) {
+		return ctx, nil
 	}
 	auth := Auth(authFunc, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.Fatal("Next handler should not have been called")
@@ -36,8 +37,8 @@ func TestAuthFuncNotOk(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
 	r.Header.Add("Authorization", "would_I_lie_to_you")
 	w := httptest.NewRecorder()
-	authFunc := func(ctx context.Context, authHeader string) (bool, context.Context) {
-		return false, ctx
+	authFunc := func(ctx context.Context, authHeader string) (context.Context, error) {
+		return ctx, errors.New("Not authorised")
 	}
 	auth := Auth(authFunc, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.Fatal("Next handler should not have been called")
@@ -59,8 +60,8 @@ func TestAuthOk(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
 	r.Header.Add("Authorization", "magic_password")
 	w := httptest.NewRecorder()
-	authFunc := func(ctx context.Context, authHeader string) (bool, context.Context) {
-		return true, ctx
+	authFunc := func(ctx context.Context, authHeader string) (context.Context, error) {
+		return ctx, nil
 	}
 	auth := Auth(authFunc, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -83,9 +84,9 @@ func TestAuthOkAddToContext(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
 	r.Header.Add("Authorization", "magic_password")
 	w := httptest.NewRecorder()
-	authFunc := func(ctx context.Context, authHeader string) (bool, context.Context) {
+	authFunc := func(ctx context.Context, authHeader string) (context.Context, error) {
 		userCtx := context.WithValue(ctx, userContextKey, "test@test.com")
-		return true, userCtx
+		return userCtx, nil
 	}
 	auth := Auth(authFunc, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Context().Value(userContextKey) != "test@test.com" {

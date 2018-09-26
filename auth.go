@@ -7,9 +7,9 @@ import (
 
 // AuthFunc defines the user supplied function to implement Authorisation
 // It is given the current request context and the Authorization header value
-// and returns whether on not the request is authenticate
-// and the context object to use with further chained http handlers
-type AuthFunc func(context.Context, string) (bool, context.Context)
+// and returns the context object to use with further chained http handlers.
+// If an err is returned chained http handlers are not called
+type AuthFunc func(context.Context, string) (context.Context, error)
 
 // Auth middleware is responsible handling request authentication
 // The authentication is handled by the supplied AuthFunc
@@ -22,8 +22,8 @@ func Auth(authFunc AuthFunc, next http.Handler) http.Handler {
 			// w.Write(errors.New("unauthorized: no authentication provided").Error())
 			return
 		}
-		ok, ctx := authFunc(r.Context(), auth)
-		if !ok {
+		ctx, err := authFunc(r.Context(), auth)
+		if err != nil {
 			// unauthorised
 			w.WriteHeader(http.StatusUnauthorized)
 			return
