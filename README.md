@@ -10,6 +10,8 @@ Collection of Golang HTTP middlewares fo use with Go's `net/http` package
 
 - [**auth**](https://github.com/sinnott74/go-http-middleware/blob/master/auth.go) handles authenication using a user supplied authenication function.
 
+- [**JWT**](https://github.com/sinnott74/go-http-middleware/blob/master/JWT.go) handles JWT authenication which allows a user supplied validation function.
+
 ## Installation
 
 `go get https://github.com/sinnott74/go-http-middleware`
