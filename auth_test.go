@@ -17,7 +17,7 @@ func TestAuthNoHeader(t *testing.T) {
 	authFunc := func(ctx context.Context, authHeader string) (context.Context, error) {
 		return ctx, nil
 	}
-	auth := Auth(authFunc, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	auth := Auth(authFunc)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.Fatal("Next handler should not have been called")
 	}))
 
@@ -40,7 +40,7 @@ func TestAuthFuncNotOk(t *testing.T) {
 	authFunc := func(ctx context.Context, authHeader string) (context.Context, error) {
 		return ctx, errors.New("Not authorised")
 	}
-	auth := Auth(authFunc, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	auth := Auth(authFunc)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.Fatal("Next handler should not have been called")
 	}))
 
@@ -63,7 +63,7 @@ func TestAuthOk(t *testing.T) {
 	authFunc := func(ctx context.Context, authHeader string) (context.Context, error) {
 		return ctx, nil
 	}
-	auth := Auth(authFunc, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	auth := Auth(authFunc)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Test"))
 	}))
@@ -88,7 +88,7 @@ func TestAuthOkAddToContext(t *testing.T) {
 		userCtx := context.WithValue(ctx, userContextKey, "test@test.com")
 		return userCtx, nil
 	}
-	auth := Auth(authFunc, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	auth := Auth(authFunc)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Context().Value(userContextKey) != "test@test.com" {
 			t.Fatal("Expected user to be set on the request context")
 		}

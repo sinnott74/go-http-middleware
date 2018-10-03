@@ -13,22 +13,24 @@ type AuthFunc func(context.Context, string) (context.Context, error)
 
 // Auth middleware is responsible handling request authentication
 // The authentication is handled by the supplied AuthFunc
-func Auth(authFunc AuthFunc, next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		auth := r.Header.Get("Authorization")
-		if auth == "" {
-			// missing header
-			w.WriteHeader(http.StatusUnauthorized)
-			// w.Write(errors.New("unauthorized: no authentication provided").Error())
-			return
+func Auth(authFunc AuthFunc) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			auth := r.Header.Get("Authorization")
+			if auth == "" {
+				// missing header
+				w.WriteHeader(http.StatusUnauthorized)
+				// w.Write(errors.New("unauthorized: no authentication provided").Error())
+				return
+			}
+			ctx, err := authFunc(r.Context(), auth)
+			if err != nil {
+				// unauthorised
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			next.ServeHTTP(w, r.WithContext(ctx))
 		}
-		ctx, err := authFunc(r.Context(), auth)
-		if err != nil {
-			// unauthorised
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-		next.ServeHTTP(w, r.WithContext(ctx))
+		return http.HandlerFunc(fn)
 	}
-	return http.HandlerFunc(fn)
 }

@@ -19,7 +19,7 @@ func TestJWTNoHeader(t *testing.T) {
 	jwtOptions := JWTOptions{secret: secret}
 	r, _ := http.NewRequest("GET", "/", nil)
 	w := httptest.NewRecorder()
-	auth := JWT(jwtOptions, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	auth := JWT(jwtOptions)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.Fatal("Next handler should not have been called")
 	}))
 
@@ -41,7 +41,7 @@ func TestJWTBadToken(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
 	r.Header.Add("Authorization", "would_I_lie_to_you")
 	w := httptest.NewRecorder()
-	auth := JWT(jwtOptions, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	auth := JWT(jwtOptions)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.Fatal("Next handler should not have been called")
 	}))
 
@@ -64,7 +64,7 @@ func TestJWTValidToken(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
 	r.Header.Add("Authorization", token)
 	w := httptest.NewRecorder()
-	auth := JWT(jwtOptions, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	auth := JWT(jwtOptions)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
@@ -87,7 +87,7 @@ func TestJWTExpiredToken(t *testing.T) {
 	token := createJWTWithExpiration(t, secret, time.Now().Add(-time.Minute*1))
 	r.Header.Add("Authorization", token)
 	w := httptest.NewRecorder()
-	auth := JWT(jwtOptions, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	auth := JWT(jwtOptions)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.Fatal("Next handler should not have been called as the token is invalid")
 	}))
 
@@ -112,7 +112,7 @@ func TestJWTValidTokenWithUserSuppliedFunc(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
 	r.Header.Add("Authorization", token)
 	w := httptest.NewRecorder()
-	auth := JWT(jwtOptions, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	auth := JWT(jwtOptions)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Context().Value(userContextKey) != "test@test.com" {
 			t.Fatal("Expected user to be set on the request context")
 		}
@@ -139,7 +139,7 @@ func TestJWTValidTokenWithUserSuppliedFuncThatReturnsError(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
 	r.Header.Add("Authorization", token)
 	w := httptest.NewRecorder()
-	auth := JWT(jwtOptions, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	auth := JWT(jwtOptions)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.Fatal("Next handler should not have been called are user supplied func returns an error")
 	}))
 

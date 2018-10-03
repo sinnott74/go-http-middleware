@@ -21,10 +21,12 @@ type JWTOptions struct {
 }
 
 // JWT is middleware which handles authentication for JsonWebTokens
-func JWT(options JWTOptions, next http.Handler) http.Handler {
-	authenticater := jwtAuth{secret: options.secret, userSuppliedFunc: options.authFunc}
+func JWT(options JWTOptions) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		authenticater := jwtAuth{secret: options.secret, userSuppliedFunc: options.authFunc}
 
-	return Auth(authenticater.authenticate, next)
+		return Auth(authenticater.authenticate)(next)
+	}
 }
 
 // jwtAuth is the private version of JWTOptions which contains the authentication function passed to Auth middleware
