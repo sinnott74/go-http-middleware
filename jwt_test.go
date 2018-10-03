@@ -16,7 +16,7 @@ func TestJWTNoHeader(t *testing.T) {
 
 	// Arrange
 	secret := []byte("SECRET_SSSHHHHHHH")
-	jwtOptions := JWTOptions{secret: secret}
+	jwtOptions := JWTOptions{Secret: secret}
 	r, _ := http.NewRequest("GET", "/", nil)
 	w := httptest.NewRecorder()
 	auth := JWT(jwtOptions)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +37,7 @@ func TestJWTBadToken(t *testing.T) {
 
 	// Arrange
 	secret := []byte("SECRET_SSSHHHHHHH")
-	jwtOptions := JWTOptions{secret: secret}
+	jwtOptions := JWTOptions{Secret: secret}
 	r, _ := http.NewRequest("GET", "/", nil)
 	r.Header.Add("Authorization", "would_I_lie_to_you")
 	w := httptest.NewRecorder()
@@ -59,7 +59,7 @@ func TestJWTValidToken(t *testing.T) {
 
 	// Arrange
 	secret := []byte("SECRET_SSSHHHHHHH")
-	jwtOptions := JWTOptions{secret: secret}
+	jwtOptions := JWTOptions{Secret: secret}
 	token := createValidJWT(t, secret)
 	r, _ := http.NewRequest("GET", "/", nil)
 	r.Header.Add("Authorization", token)
@@ -82,7 +82,7 @@ func TestJWTExpiredToken(t *testing.T) {
 
 	// Arrange
 	secret := []byte("SECRET_SSSHHHHHHH")
-	jwtOptions := JWTOptions{secret: secret}
+	jwtOptions := JWTOptions{Secret: secret}
 	r, _ := http.NewRequest("GET", "/", nil)
 	token := createJWTWithExpiration(t, secret, time.Now().Add(-time.Minute*1))
 	r.Header.Add("Authorization", token)
@@ -104,7 +104,7 @@ func TestJWTValidTokenWithUserSuppliedFunc(t *testing.T) {
 
 	// Arrange
 	secret := []byte("SECRET_SSSHHHHHHH")
-	jwtOptions := JWTOptions{secret: secret, authFunc: func(ctx context.Context, claims jwt.MapClaims) (context.Context, error) {
+	jwtOptions := JWTOptions{Secret: secret, AuthFunc: func(ctx context.Context, claims jwt.MapClaims) (context.Context, error) {
 		userCtx := context.WithValue(ctx, userContextKey, "test@test.com")
 		return userCtx, nil
 	}}
@@ -132,7 +132,7 @@ func TestJWTValidTokenWithUserSuppliedFuncThatReturnsError(t *testing.T) {
 
 	// Arrange
 	secret := []byte("SECRET_SSSHHHHHHH")
-	jwtOptions := JWTOptions{secret: secret, authFunc: func(ctx context.Context, claims jwt.MapClaims) (context.Context, error) {
+	jwtOptions := JWTOptions{Secret: secret, AuthFunc: func(ctx context.Context, claims jwt.MapClaims) (context.Context, error) {
 		return ctx, errors.New("User supplied func says claims aren't good")
 	}}
 	token := createValidJWT(t, secret)

@@ -16,14 +16,14 @@ type JWTFunc func(context.Context, jwt.MapClaims) (context.Context, error)
 
 // JWTOptions defines the user supplied JWT configuration options.
 type JWTOptions struct {
-	secret   []byte
-	authFunc JWTFunc
+	Secret   []byte
+	AuthFunc JWTFunc
 }
 
 // JWT is middleware which handles authentication for JsonWebTokens
 func JWT(options JWTOptions) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		authenticater := jwtAuth{secret: options.secret, userSuppliedFunc: options.authFunc}
+		authenticater := jwtAuth{secret: options.Secret, userSuppliedFunc: options.AuthFunc}
 
 		return Auth(authenticater.authenticate)(next)
 	}
