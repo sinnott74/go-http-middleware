@@ -12,7 +12,7 @@ import (
 
 // DefaultEtag middleware which uses MD5 as its hashing function
 func DefaultEtag(next http.Handler) http.Handler {
-	return Etag(md5.New())(next)
+	return Etag(md5.New)(next)
 }
 
 // Etag middleware which handles adding an ETag header to the response
@@ -20,11 +20,11 @@ func DefaultEtag(next http.Handler) http.Handler {
 // It allows the server to skip sending the resource over the object if the client has it already
 // A StatusNotModified (304) is returned when the client's resource is up to date.
 // Client's set the If-None-Match header to send their cached ETag for a resource
-func Etag(hash hash.Hash) func(next http.Handler) http.Handler {
+func Etag(newHash func() hash.Hash) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-			hash.Reset()
+			hash := newHash()
 			etagWriter := &etagWriter{rw: w, hash: hash, buf: bytes.NewBuffer(nil)}
 			next.ServeHTTP(etagWriter, r)
 

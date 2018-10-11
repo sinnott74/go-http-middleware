@@ -118,7 +118,7 @@ func TestEtag(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/test", nil)
 	w := httptest.NewRecorder()
 	responseText := "Test"
-	etag := Etag(sha1.New())(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	etag := Etag(sha1.New)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(responseText))
 	}))
