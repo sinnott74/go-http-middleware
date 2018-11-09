@@ -42,7 +42,7 @@ type JWTOptions struct {
 }
 
 // JWT is middleware which handles authentication for JsonWebTokens
-func JWT(options JWTOptions) func(next http.Handler) http.Handler {
+func JWT(options JWTOptions) Middleware {
 
 	if options.Extractor == nil {
 		options.Extractor = defaultTokenExtractor

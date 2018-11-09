@@ -13,7 +13,7 @@ type AuthFunc func(context.Context, string) (context.Context, error)
 
 // Auth middleware is responsible handling request authentication
 // The authentication is handled by the supplied AuthFunc
-func Auth(authFunc AuthFunc) func(next http.Handler) http.Handler {
+func Auth(authFunc AuthFunc) Middleware {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			auth := r.Header.Get("Authorization")

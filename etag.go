@@ -20,7 +20,7 @@ func DefaultEtag(next http.Handler) http.Handler {
 // It allows the server to skip sending the resource over the object if the client has it already
 // A StatusNotModified (304) is returned when the client's resource is up to date.
 // Client's set the If-None-Match header to send their cached ETag for a resource
-func Etag(newHash func() hash.Hash) func(next http.Handler) http.Handler {
+func Etag(newHash func() hash.Hash) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
