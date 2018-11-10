@@ -103,8 +103,4 @@ func TestAuthOkAddToContext(t *testing.T) {
 	}
 }
 
-type contextKey struct {
-	name string
-}
-
 var userContextKey = &contextKey{"user"}

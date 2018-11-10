@@ -12,6 +12,8 @@ Collection of Golang HTTP middlewares fo use with Go's `net/http` package
 
 - [**JWT**](https://github.com/sinnott74/go-http-middleware/blob/master/JWT.go) handles JWT authenication which allows a user supplied validation function.
 
+- [**Transaction**](https://github.com/sinnott74/go-http-middleware/blob/master/Transaction.go) creates a request scoped sql transation.
+
 ## Installation
 
 `go get https://github.com/sinnott74/go-http-middleware`

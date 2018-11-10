@@ -28,7 +28,7 @@ func Etag(newHash func() hash.Hash) Middleware {
 			etagWriter := &etagWriter{rw: w, hash: hash, buf: bytes.NewBuffer(nil)}
 			next.ServeHTTP(etagWriter, r)
 
-			if !isStatusOk(etagWriter.status) || etagWriter.status == http.StatusNoContent || etagWriter.buf.Len() == 0 {
+			if !isHTTPStatusOk(etagWriter.status) || etagWriter.status == http.StatusNoContent || etagWriter.buf.Len() == 0 {
 				etagWriter.writeResponse()
 				return
 			}
@@ -94,9 +94,4 @@ func (w *etagWriter) etag() string {
 	base64Hash := base64.StdEncoding.EncodeToString(sumHash)
 	len := strconv.FormatInt(int64(w.buf.Len()), 16) // hexidecimal
 	return fmt.Sprintf("W/\"%v-%v\"", len, base64Hash)
-}
-
-// isStatusOk check is the given http status is in the 2xx range
-func isStatusOk(status int) bool {
-	return status >= 200 && status < 300
 }
